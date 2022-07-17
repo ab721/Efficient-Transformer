@@ -77,12 +77,12 @@ def train(config):
 
         progress_bar.close()
 
-        jaccard0, jaccard1, precision0, precision1, recall0, recall1, f10, f11, accuracy0, accuracy1 = test(config = config, mdl = mdl, epoch = e + 1, test_set = test_set)
+        jaccard0, jaccard1, precision0, precision1, recall0, recall1, f10, f11, accuracy = test(config = config, mdl = mdl, epoch = e + 1, test_set = test_set)
         metrics = {'jaccard_background': jaccard0, 'jaccard_corrosion': jaccard1, 
                    'precision_background': precision0, 'precision_corrosion': precision1,
                    'recall_background': recall0, 'recall_corrosion': recall1,
                    'f1_background': f10, 'f1_corrosion': f11,
-                   'accuracy_background': accuracy0, 'accuracy_corrosion': accuracy1}
+                   'accuracy_overall': accuracy}
         wandb.log(metrics)
 
         if jaccard1 > best_iou:
@@ -124,16 +124,16 @@ def test(config, mdl, epoch, test_set):
     precision0, precision1 = precision_score(true_values, predicted_values, average = None)
     recall0, recall1 = recall_score(true_values, predicted_values, average = None)
     f10, f11 = f1_score(true_values, predicted_values, average = None)
-    accuracy0, accuracy1 = accuracy_score(true_values, predicted_values, average = None)
+    accuracy = accuracy_score(true_values, predicted_values)
     
     print(f'*************************** For {epoch} *******************************')
     print(f'The Jaccard score is {jaccard0}, {jaccard1}')
     print(f'The F1 score is {f10}, {f11}')
     print(f'The Precision is {precision0}, {precision1}')
     print(f'The Recall is {recall0}, {recall1}')
-    print(f'The Accuracy is {accuracy0}, {accuracy1}')
+    print(f'The Accuracy is {accuracy}')
 
-    return jaccard0, jaccard1, precision0, precision1, recall0, recall1, f10, f11, accuracy0, accuracy1
+    return jaccard0, jaccard1, precision0, precision1, recall0, recall1, f10, f11, accuracy
 
 
 if __name__ == '__main__':
