@@ -17,6 +17,7 @@ class Efficient_Transformer(nn.Module):
         self.decoder = Decoder_AND_Head(decoder_channels, decoder_widths, decoder_scale_factors, num_classes)
         if num_classes == 1: self.activation = nn.Sigmoid()
         else: self.activation = nn.Softmax()
+        self.upsample = nn.Upsample(scale_factor = 4, mode = 'bilinear', align_corners = True)
 
     def forward(self, x):
 
@@ -44,6 +45,8 @@ class Efficient_Transformer(nn.Module):
         #x6 = s6              #The pooled output from the final layer of the encoder could come in handy for other decoders, but it is not useful in mine
 
         y = self.decoder([x5, x4, x3, x2]) #Note: Sigmoid/softmax has not been applied
+
+        y = self.upsample(y)
 
         y = self.activation(y)
 
