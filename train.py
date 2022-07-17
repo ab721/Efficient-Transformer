@@ -52,7 +52,7 @@ def train(config):
                                                     batch_size = config['batch_size'], num_workers = config['num_workers'])
 
 
-    optimizer = torch.optim.AdamW(model.parameters(), lr = config['learning_rate'])
+    optimizer = torch.optim.AdamW(mdl.parameters(), lr = config['learning_rate'])
     scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones = config['lr_decay_epochs'], gamma = config['lr_decay_rate'])
 
     for e in range(config['num_epochs']):

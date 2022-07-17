@@ -52,10 +52,10 @@ class Efficient_Transformer(nn.Module):
 
 if __name__ == '__main__':
     x = torch.randn((1, 3, 384, 384))
-    model = Efficient_Transformer(swin_weight_path = '.\swin_weights.pth', decoder_channels = 256, 
+    mdl = Efficient_Transformer(swin_weight_path = '.\swin_weights.pth', decoder_channels = 256, 
                                   decoder_scale_factors = [8, 4, 2, 1], swin_drop_rate = 0, swin_attn_drop_rate = 0, 
                                   swin_drop_path_rate = 0.2, decoder_widths = [184, 336, 704, 1352], num_classes = 1
                                  )                               
-    y = model(x)
+    y = mdl(x)
     print(y.size())
-    print(sum(p.numel() for p in model.parameters() if p.requires_grad))
+    print(sum(p.numel() for p in mdl.parameters() if p.requires_grad))
