@@ -38,7 +38,8 @@ def train(config):
     dtype_dic= {'ImageId': str,'fold_id' : int}
     df_cvfolds = pd.read_csv(validation_text, usecols=['ImageId','fold_id'], dtype = dtype_dic)
     total_files = [i[:-4] for i in sorted(os.listdir(f"{config['data_directory']}/Images"))]
-    test_set = df_cvfolds[df_cvfolds.fold_id == {config['subset'][-1]}].ImageId.tolist()
+    given_fold = int(config['subset'][-1])
+    test_set = df_cvfolds[df_cvfolds.fold_id == given_fold].ImageId.tolist()
     train_set = list_diff(total_files, test_set)
 
     output_directory = f"{config['output_directory']}/Checkpoints/Efficient_Transformer/{config['model_identifier']}"
@@ -76,7 +77,7 @@ def train(config):
 
         progress_bar.close()
 
-        jaccard0, jaccard1, precision0, precision1, recall0, recall1, f10, f11, accuracy0, accuracy1 = test.test(config = config, mdl = mdl, epoch = e + 1, test_set = test_set)
+        jaccard0, jaccard1, precision0, precision1, recall0, recall1, f10, f11, accuracy0, accuracy1 = test(config = config, mdl = mdl, epoch = e + 1, test_set = test_set)
         metrics = {'jaccard_background': jaccard0, 'jaccard_corrosion': jaccard1, 
                    'precision_background': precision0, 'precision_corrosion': precision1,
                    'recall_background': recall0, 'recall_corrosion': recall1,
