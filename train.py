@@ -4,6 +4,7 @@ import tqdm
 import torch
 import wandb
 import random
+import imgaug
 import numpy as np
 import pandas as pd
 from pathlib import Path
@@ -13,7 +14,8 @@ from sklearn.metrics import jaccard_score, precision_score, recall_score, f1_sco
 import data_pipeline, model, dice_loss
 
 SEED = 42
-random.seed(SEED)                          
+random.seed(SEED)
+imgaug.random.seed(SEED)                         
 np.random.seed(SEED)                       
 torch.manual_seed(SEED)                    
 torch.cuda.manual_seed(SEED)               
