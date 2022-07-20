@@ -1,4 +1,5 @@
 import os
+import sys
 import tqdm
 import torch
 import wandb
@@ -44,7 +45,8 @@ def train(config):
 
     output_directory = f"{config['output_directory']}/Checkpoints/Efficient_Transformer/{config['model_identifier']}"
     Path(output_directory).mkdir(parents = True, exist_ok = True)
-
+    
+    early_stop_counter = 0
     best_iou = 0.0
 
     mdl = mdl.cuda()
@@ -54,7 +56,7 @@ def train(config):
 
 
     optimizer = torch.optim.AdamW(mdl.parameters(), lr = config['learning_rate'])
-    scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones = config['lr_decay_epochs'], gamma = config['lr_decay_rate'])
+    scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='max', factor=config['lr_decay_factor'], patience=config['lr_decay_patience'], min_lr=config['min_lr_during_decay'], verbose=True)
 
     for e in range(config['num_epochs']):
         
@@ -72,8 +74,6 @@ def train(config):
             loss.backward()
             optimizer.step()
             progress_bar.update(img.size(0))
-            
-        scheduler.step()
 
         progress_bar.close()
 
@@ -85,10 +85,19 @@ def train(config):
                    'accuracy_overall': accuracy}
         wandb.log(metrics)
 
+        scheduler.step(jaccard1)
+
         if jaccard1 > best_iou:
             best_iou = jaccard1
+            early_stop_counter = 0
             torch.save({'model': mdl.state_dict(), 'optimizer': optimizer.state_dict(), 'scheduler': scheduler.state_dict(), 
                          'epoch': e+1, 'metrics': metrics}, f"{output_directory}/best_mdl.pth")
+
+        else:
+            early_stop_counter += 1
+
+        if early_stop_counter > config['early_stop_patience']:
+            sys.exit("PERFORMANCE STOPPED IMPROVING. EARLY STOPPED.")
 
 
 
@@ -139,29 +148,44 @@ def test(config, mdl, epoch, test_set):
 if __name__ == '__main__':
 
     config = dict(
+                
+                #Augmentation
                 train_augmentation = Compose([HorizontalFlip(), RandomRotate90(), ChannelShuffle(), CoarseDropout(), ColorJitter(), 
                                             FancyPCA(), GaussianBlur(), Resize(384, 384,interpolation=cv2.INTER_NEAREST), 
                                             Normalize()], p=1.0),
-                test_augmentation = Compose([Resize(384, 384,interpolation=cv2.INTER_NEAREST), Normalize()], p=1.0),
-                data_directory = '../input/corrosion-segmentation/Resized/Resized',
+                test_augmentation = Compose([Resize(384, 384,interpolation=cv2.INTER_NEAREST), Normalize()], p=1.0),  
+                
+                #Model             
+                decoder_channels = 512, #256,
+                decoder_scale_factors = [8, 4, 2, 1],
+                decoder_widths = [184, 336, 704, 1352],
+                num_classes = 1,
+
+                #Training
+                batch_size = 6,
+                learning_rate = 1e-4,
+                num_epochs = 50,
+                lr_decay_factor = 0.1,
+                lr_decay_patience = 15,
+                early_stop_patience = 15,
+                min_lr_during_decay = 1e-7,
+                num_workers = 2,
+
+                #Regularization
+                swin_drop_rate = 0,
+                swin_attn_drop_rate = 0,
+                swin_drop_path_rate = 0, #0.2,
+                
+                #Decision making
+                threshold = 0.5,
+                
+                #Sets and directories
                 subset = 'kfold1',
-                batch_size = 12,
+                data_directory = '../input/corrosion-segmentation/Resized/Resized',
                 model_identifier = 'first_run',
                 output_directory = ".", #for kaggle, otherwise, same as data_directory
                 swin_weight_path = '../input/swin-weights/swinv2_base_patch4_window12to24_192to384_22kto1k_ft.pth',
-                decoder_channels = 256,
-                decoder_scale_factors = [8, 4, 2, 1],
-                swin_drop_rate = 0,
-                swin_attn_drop_rate = 0,
-                swin_drop_path_rate = 0.2,
-                decoder_widths = [184, 336, 704, 1352],
-                num_classes = 1,
-                learning_rate = 2e-5,
-                num_epochs = 20,
-                lr_decay_epochs = [50, 100, 150, 200],
-                lr_decay_rate = 0.1,
-                threshold = 0.5,
-                num_workers = 4
+
                 )
 
     train.train(config)
