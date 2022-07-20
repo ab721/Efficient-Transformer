@@ -1,4 +1,5 @@
 import os
+import cv2
 import sys
 import tqdm
 import torch
@@ -8,7 +9,6 @@ import imgaug
 import numpy as np
 import pandas as pd
 from pathlib import Path
-from albumentations import *
 from sklearn.metrics import jaccard_score, precision_score, recall_score, f1_score, accuracy_score
 
 import data_pipeline, model, dice_loss
@@ -21,6 +21,8 @@ torch.manual_seed(SEED)
 torch.cuda.manual_seed(SEED)               
 torch.cuda.manual_seed_all(SEED)           
 torch.backends.cudnn.deterministic = True
+
+from albumentations import *
 
 def list_diff(list1, list2):
     list_dif = [i for i in list1 + list2 if i not in list1 or i not in list2]
