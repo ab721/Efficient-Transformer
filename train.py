@@ -164,7 +164,7 @@ if __name__ == '__main__':
                 #Training
                 batch_size = 6,
                 learning_rate = 1e-4,
-                num_epochs = 50,
+                num_epochs = 100,
                 lr_decay_factor = 0.1,
                 lr_decay_patience = 15,
                 early_stop_patience = 15,

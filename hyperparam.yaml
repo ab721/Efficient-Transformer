@@ -1,0 +1,18 @@
+program: train.py
+method: bayes
+metric:
+  goal: maximize
+  name: jaccard_corrosion
+parameters:
+  batch_size:
+    values: [4, 6, 12]
+  decoder_channels:
+    values: [256, 384, 512, 768, 1024]
+  learning_rate:
+    values: [1e-2, 1e-3, 1e-4, 1e-5, 1e-6]
+  swin_drop_rate:
+    values: [0, 0.2]
+  swin_attn_drop_rate:
+    values: [0, 0.2]
+  swin_drop_path_rate:
+    values: [0, 0.2]
