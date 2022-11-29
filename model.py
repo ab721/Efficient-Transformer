@@ -43,7 +43,7 @@ class Efficient_Transformer(nn.Module):
         x4 = torch.cat((s4, e4), dim = 1)
         x5 = torch.cat((s5, e5), dim = 1)
         #x6 = s6              #The pooled output from the final layer of the encoder could come in handy for other decoders, but it is not useful in mine
-
+        print(x5.size(), x4.size(), x3.size(), x2.size())
         y = self.decoder([x5, x4, x3, x2]) #Note: Sigmoid/softmax has not been applied
 
         y = self.upsample(y)
