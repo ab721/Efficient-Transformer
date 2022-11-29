@@ -43,7 +43,6 @@ class Efficient_Transformer(nn.Module):
         x4 = torch.cat((s4, e4), dim = 1)
         x5 = torch.cat((s5, e5), dim = 1)
         #x6 = s6              #The pooled output from the final layer of the encoder could come in handy for other decoders, but it is not useful in mine
-        print(x5.size(), x4.size(), x3.size(), x2.size())
         y = self.decoder([x5, x4, x3, x2]) #Note: Sigmoid/softmax has not been applied
 
         y = self.upsample(y)
@@ -57,8 +56,8 @@ if __name__ == '__main__':
     x = torch.randn((1, 3, 384, 384))
     mdl = Efficient_Transformer(swin_weight_path = '.\swin_weights.pth', decoder_channels = 256, 
                                   decoder_scale_factors = [8, 4, 2, 1], swin_drop_rate = 0, swin_attn_drop_rate = 0, 
-                                  swin_drop_path_rate = 0.2, decoder_widths = [152,304,632,1376], num_classes = 1
-                                 )                                           #[184, 336, 704, 1352]
+                                  swin_drop_path_rate = 0.2, decoder_widths = [184, 336, 704, 1352], num_classes = 1
+                                 )                                           
     y = mdl(x)
     print(y.size())
     print(sum(p.numel() for p in mdl.parameters() if p.requires_grad))
