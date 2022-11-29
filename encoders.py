@@ -640,7 +640,7 @@ class EfficientNetV2(nn.Module):
     def __init__(self, pretrained = True):
         super().__init__()
 
-        self.intermediate_features = timm.create_model('efficientnetv2_rw_m', features_only=True, pretrained=pretrained)
+        self.intermediate_features = timm.create_model('efficientnet-b2', features_only=True, pretrained=pretrained) #efficientnetv2_rw_m
 
     def forward(self, x):
 
